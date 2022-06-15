@@ -1,0 +1,197 @@
+gen_Lambda <- function(n=200,p=100, k=1, Fs, intercepts) {
+  if (k==1) {
+    L <- rnorm(n)
+    L <- L - mean(L)
+  }
+  
+  LFT <- L%*%t(Fs)
+  logLambda <- t(apply(LFT, 1, function(u) u+intercepts))
+  Lambda <- exp(logLambda)
+  
+  return(Lambda)
+  return(list(dat=X,mean=EX, coeffs=Fs, intercepts=intercepts))
+}
+
+
+gen_pois_data <- function(gammas, Lambda) {
+  EX <- apply(Lambda, 2, function(u) u*gammas)
+  X <- apply(EX,2,function(u) rpois(length(u),u))
+  return(X)
+}
+
+gen_pois_data_overdisp <- function(gammas, Lambda, b) {
+  n <- NROW(Lambda)
+  p <- NCOL(Lambda)
+  overdisps <- matrix(rgamma(n*p, b,b), nrow=n)
+  EX <- apply(Lambda, 2, function(u) u*gammas)
+  EX <- EX*overdisps
+  X <- apply(EX,2,function(u) rpois(length(u),u))
+  return(X)
+}
+
+
+one_trial_count_split <- function(n,p,filename, k=1,propImp=0.1, sig_strength=5, propLowMedHigh = c(1/4,1/4,1/4,1/4), eps=c(0.5), c=1, 
+                                  overdisp=FALSE,b=1) {
+  
+  intercepts <- sample(c(log(1), log(3), log(25), log(100)), prob=propLowMedHigh, replace=TRUE, size=p)
+  
+  num_non_null <- floor(propImp*p)
+  numNull <- p-num_non_null
+  
+  Fs <- c(rep(sig_strength, num_non_null), rep(0, numNull))
+  Fs <- rep(c(-1,1), p/2)*Fs
+  
+  Lambda <- gen_Lambda(n,p,k,Fs,intercepts)
+  gammas <- rgamma(n, 10, scale=1/10)
+  
+  if (overdisp) {
+    X <- gen_pois_data_overdisp(gammas,Lambda,b)
+  } else {
+  X <- gen_pois_data(gammas,Lambda)
+  }
+  
+  ep <- 10
+  res <- cbind(1:p, Fs, intercepts, naive(X, Lambda, ep, c, gammas), ep, "known", propImp, n,p, propLowMedHigh[1], 
+               propLowMedHigh[2],propLowMedHigh[3],propLowMedHigh[4],b)
+  write(t(res), file=filename, append=TRUE, ncol=16)
+  
+  for (ep in eps) {
+    res <- cbind(1:p, Fs, intercepts, countsplit(X, Lambda, ep, c, gammas), ep, "known", propImp, n,p, propLowMedHigh[1], 
+                 propLowMedHigh[2],propLowMedHigh[3],propLowMedHigh[4],b)
+    write(t(res), file=filename, append=TRUE, ncol=16)
+  }
+  
+}
+
+mynbglm <- function(u, pseudotime, gammas) {
+  try1 <- try(suppressWarnings(MASS::glm.nb(u~pseudotime+offset(log(gammas)))))
+  if (class(try1)[1]=="try-error") {
+    return(10)
+  } else {
+    return(summary(try1)$coefficients[2,4])
+  }
+}
+
+naive <- function(X,Lambda, ep,c=1, gammas=rep(1,NROW(X))) {
+  
+  hX <- log(diag(1/gammas)%*%X+c)
+  hXtraincenter <- apply(hX,2,function(u) u-mean(u))
+  
+  
+  #pseudotime <- princomp(hXtrain)$scores[,1]
+  pseudotime <- svd(hXtraincenter)$u[,1]
+  
+  # Could it possibly matter here whether or not I put a 1-eps in the offset??? 
+  pvals_pseudotime <- apply(X, 2, function(u) mynbglm(u,pseudotime,gammas))
+  
+  true_coeffs <- suppressWarnings(apply(Lambda, 2, function(u) mynbglm(u,pseudotime,gammas)))
+  trueprincomp <- svd(apply(log(Lambda),2,function(u) u-mean(u)))$u[,1]
+  
+  true_cor <- cor(pseudotime, trueprincomp)
+  
+  return(cbind(pvals_pseudotime,true_coeffs, true_cor))
+}
+
+countsplit <- function(X,Lambda, ep,c=1, gammas=rep(1,NROW(X))) {
+  Xtrain <- apply(X,2,function(u) rbinom(n=length(u), size=u, p=ep))
+  Xtest <- X-Xtrain
+  
+  hXtrain <- log(diag(1/gammas)%*%Xtrain+c)
+  hXtraincenter <- apply(hXtrain,2,function(u) u-mean(u))
+  
+
+  #pseudotime <- princomp(hXtrain)$scores[,1]
+  pseudotime <- svd(hXtraincenter)$u[,1]
+  
+  # Could it possibly matter here whether or not I put a 1-eps in the offset??? 
+  pvals_pseudotime <- apply(Xtest, 2, function(u) mynbglm(u,pseudotime,gammas))
+  
+  true_coeffs <- suppressWarnings(apply(Lambda, 2, function(u) mynbglm(u,pseudotime,gammas)))
+  trueprincomp <- svd(apply(log(Lambda),2,function(u) u-mean(u)))$u[,1]
+
+  true_cor <- cor(pseudotime, trueprincomp)
+  
+  return(cbind(pvals_pseudotime,true_coeffs, true_cor))
+}
+
+
+naive_cluster <- function(X,Lambda, ep,c=1, gammas=rep(1,NROW(X)), trueclusters=rep(1,NROW(X))) {
+  
+  hX <- log(diag(1/gammas)%*%X+c)
+  
+  clusters <- as.factor(kmeans(apply(hX,2,function(u) u-mean(u)), 2)$cluster)
+  
+  pvals_pseudotime <- apply(X, 2, function(u) mynbglm(u,clusters,gammas))
+  
+  true_coeffs <- suppressWarnings(apply(Lambda, 2, function(u) mynbglm(u,clusters,gammas)))
+  
+  #pvals_pseudotime <- apply(Xtest, 2, function(u) summary(glm(u~clusters, offset=log(gammas), family="poisson"))$coefficients[2,4])
+  
+  #### CONSIDER REMOVING 1-EPS FROM OFFSET
+  #true_coeffs <- suppressWarnings(apply(Lambda, 2, function(u) summary(glm(u~clusters, family="poisson"))$coefficients[2,1]))
+  
+  true_cor <- mclust::adjustedRandIndex(clusters, trueclusters)
+  
+  return(cbind(pvals_pseudotime,true_coeffs, true_cor))
+}
+
+countsplit_cluster <- function(X,Lambda, ep,c=1, gammas=rep(1,NROW(X)), trueclusters=rep(1,NROW(X))) {
+  Xtrain <- apply(X,2,function(u) rbinom(n=length(u), size=u, p=ep))
+  Xtest <- X-Xtrain
+  
+  hXtrain <- log(diag(1/gammas)%*%Xtrain+c)
+  
+  clusters <- as.factor(kmeans(apply(hXtrain,2,function(u) u-mean(u)), 2)$cluster)
+  
+  pvals_pseudotime <- apply(Xtest, 2, function(u) mynbglm(u,clusters,gammas))
+  
+  true_coeffs <- suppressWarnings(apply(Lambda, 2, function(u) mynbglm(u,clusters,gammas)))
+
+  
+  true_cor <- mclust::adjustedRandIndex(clusters, trueclusters)
+  
+  return(cbind(pvals_pseudotime,true_coeffs, true_cor))
+}
+
+
+
+one_trial_count_split_cluster <- function(n,p,filename, k=1,propImp=0.1, sig_strength=5, propLowMedHigh = c(1/4,1/4,1/4,1/4), eps=c(0.5), c=1, props=0.5, overdisp=FALSE,
+                                          b=5) {
+  
+  intercepts <- sample(c(log(1), log(3),log(25),log(100)), prob=propLowMedHigh, replace=TRUE, size=p)
+  
+  num_non_null <- floor(propImp*p)
+  numNull <- p-num_non_null
+  
+  L <- sample(0:1, size=n, props)
+  
+  Fs <- c(rep(sig_strength, num_non_null), rep(0, numNull))
+  Fs <- rep(c(-1,1), p/2)*Fs
+  
+  LFT <- L%*%t(Fs)
+  logLambda <- t(apply(LFT, 1, function(u) u+intercepts))
+  Lambda <- exp(logLambda)
+  
+  gammas <- rgamma(n, 10, scale=1/10)
+  
+  #table(kmeans(apply(log(Lambda), 2, function(u) u-mean(u)), centers=2)$cluster, L)
+  
+  if (overdisp) {
+    X <- gen_pois_data_overdisp(gammas,Lambda,b)
+  } else {
+    X <- gen_pois_data(gammas,Lambda)
+  }
+  
+  ep <- 10
+  res <- cbind(1:p, Fs, intercepts, naive_cluster(X, Lambda, ep, c, gammas), ep, "known", propImp, n,p, propLowMedHigh[1], 
+               propLowMedHigh[2],propLowMedHigh[3],propLowMedHigh[4],b)
+  write(t(res), file=filename, append=TRUE, ncol=16)
+  
+  for (ep in eps) {
+    res <- cbind(1:p, Fs, intercepts, countsplit_cluster(X, Lambda, ep, c, gammas, L), ep, "known", propImp, n,p, propLowMedHigh[1], 
+                 propLowMedHigh[2],propLowMedHigh[3],propLowMedHigh[4],b)
+    write(t(res), file=filename, append=TRUE, ncol=16)
+  }
+  
+}
+
