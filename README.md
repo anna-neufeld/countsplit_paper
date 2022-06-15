@@ -10,7 +10,7 @@ The experiments/code for Figures 3-5 are in the folder Fig345_mainsims.
 
 The experiments/code for Table 1 are in the folder Table1_coverage. 
 
-The experiments/code for Figure 6 (main text) and Figure 8 (appendix) are in the folder Fig6_realdata. ()
+The experiments/code for Figure 6 (main text) and Figure 8 (appendix) are in the folder Fig6_realdata.
 
 The experiments/code for Figure 7 (appendix) are in the folder Fig7_compare_selective. 
 
