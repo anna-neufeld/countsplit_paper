@@ -1,9 +1,9 @@
 library(tidyverse)
 library(patchwork)
-setwd("~/Dropbox/Pseudotime : PCA NEW/Paper/FinalCode/Coverage")
+setwd("~/countsplit_paper/Table1_coverage/res")
 
-setwd("~/Dropbox/Pseudotime : PCA NEW/Paper/FinalCode/Coverage/res")
-file_names <- dir("~/Dropbox/Pseudotime : PCA NEW/Paper/FinalCode/Coverage/res", pattern="april_13.*") #where you have your files
+setwd("~/countsplit_paper/Table1_coverage/res")
+file_names <- dir("~/countsplit_paper/Table1_coverage/res", pattern="april_13.*") #where you have your files
 res <- do.call(rbind,lapply(file_names,read.csv,sep="",header=FALSE))
 names(res) <- c("j", "trueCoeff", "intercept", "pval", "coverage1" , "coverage2", "coverage3", "fitCoeff", "cor", "eps", "type", "propImp",
                 "n", "p", "prop1")
@@ -30,10 +30,4 @@ cons_res <- res %>%
             cov2 = mean(coverage2), 
             cov3 = mean(coverage3),
             num = n())
-
-ggplot(data=cons_res %>% filter(n==200), 
-       aes(x=eps, y=cov1, col=as.factor(trueCoeff==0)))+geom_smooth()+ylim(0.85,1)+
-  facet_grid(rows=vars(intercept))
-
-
 

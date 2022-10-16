@@ -59,12 +59,13 @@ naivecol <- "#E763F3"
 countsplitcol <- "#E7861B"
 selectivecol <- "darkblue"
 
-ggplot(data=NULL)+geom_qq(aes(sample=pvals_lucy10, col="bSelective Inference"), distribution="qunif")+
-  geom_qq(aes(sample=pvals_countsplit10, col="aCount Splitting"), distribution="qunif")+
-  geom_qq(aes(sample=pvals_naive10, col="cNaive"), distribution="qunif")+
+ggplot(data=NULL)+geom_qq(aes(sample=pvals_lucy10, col="bSelective inference"), distribution="qunif")+
+  geom_qq(aes(sample=pvals_countsplit10, col="aCount splitting"), distribution="qunif")+
+  geom_qq(aes(sample=pvals_naive10, col="cDouble dipping"), distribution="qunif")+
   ggtitle("Uniform QQ plot")+
   geom_abline(a=0, b=1, col="black")+theme_bw()+coord_fixed()+
   labs(col="Method")+xlab("Unif(0,1) Quantiles")+ylab("Sample Quantiles")+
  scale_color_manual(values=c(countsplitcol, selectivecol, naivecol), 
-                    labels=c("Count Splitting", "Selective Inference", "Naive"))
+                    labels=c("Count splitting", "Selective inference", "Double dipping"))
+ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat Revision August 2022/Figures/selective.png")
 
