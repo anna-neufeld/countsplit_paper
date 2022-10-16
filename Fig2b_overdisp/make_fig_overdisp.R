@@ -1,4 +1,4 @@
-setwd("~/countsplit_paper/Fig2_overdisp")
+setwd("~/countsplit_paper/Fig1b_overdisp")
 setwd("./overdispres_pt")
 file_names <- dir(".", pattern="Feb2*") #where you have your files
 res <- do.call(rbind,lapply(file_names,read.csv,sep="",header=FALSE))
@@ -15,6 +15,8 @@ countsplitcol <- "#E7861B"
 res$method <- ifelse(res$eps==0.5, "Count splitting, \u03B5 =0.5", "Naive")
 res$overdisp2 <- paste("\u039B/b =", res$overdisp1)
 
+res$method[res$method=="Naive"] = "Double dipping"
+
 
 ### New plot- only the Lambda = 5 panels. 
 ggplot(data=res %>% 
@@ -26,8 +28,8 @@ ggplot(data=res %>%
   labs(col="Method")+
   coord_fixed()+
 theme_bw()+scale_color_manual(
-  limits=c("Count splitting, \u03B5 =0.5", "Naive"),
+  limits=c("Count splitting, \u03B5 =0.5", "Double dipping"),
   values=c(countsplitcol, naivecol))+
   xlab("Unif(0,1) Quantiles")+ylab("Sample Quantiles")
-#ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/paper_v22/Figures/overdisp_new.png",
-#       width=13, height=4)
+ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat Revision August 2022/Figures/overdisp_new.png",
+       width=13, height=4)
