@@ -1,4 +1,4 @@
-setwd("~/countsplit_paper/GlobalNullSims")
+setwd("~/countsplit_paper/Fig1a_globalnull/")
 source("myjackstraw.R")
 
 n <- 200

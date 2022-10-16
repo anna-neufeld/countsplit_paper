@@ -1,7 +1,7 @@
 suppressPackageStartupMessages(library(PseudotimeDE))
 suppressPackageStartupMessages(library(tibble))
 suppressPackageStartupMessages(library(dplyr))
-setwd("~/Dropbox/Pseudotime : PCA NEW/Paper/Sims")
+setwd("~/countsplit_paper/Fig1a_globalnull/")
 
 
 #### Simulate poisson data that is as boring as possible.
