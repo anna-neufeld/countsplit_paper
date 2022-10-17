@@ -87,5 +87,5 @@ p4 <- ggplot(data=Xlong2, aes(x=count, group=as.factor(cluster), fill=as.factor(
   geom_text(aes(x=11, y=85, label=paste("p", pval)))+ labs(col="cluster")+labs(fill="Cluster")
 p3+p4 & theme_bw()&  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank()) & ylab("Frequency") &
   ylim(0,100)
-#ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat Revision August 2022/Figures/intro_hists.png")
+ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat_Resubmit_October/intro_hists.eps")
 #ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat reviewer responses Aug 2022/intro_hists.png")

@@ -1,4 +1,4 @@
-setwd("~/countsplit_paper/Fig1a_globalnull/")
+setwd("~/countsplit_paper/Fig2a_globalnull/")
 load("global_null_res_may_23.RData")
 load("pvals_DE_pt.RData")
 library(tidyverse)
@@ -70,5 +70,5 @@ phigh <- ggplot(data=test %>% filter(Intercept=="10"))+
 
 library(patchwork)
 pall+plow+phigh+plot_layout(guides="collect")
-ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat Revision August 2022//Figures/Fig1.png",
+ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat_Resubmit_October/Fig2a.eps",
        width=12, height=3.5, units="in") 

@@ -30,15 +30,12 @@ args <- parser$parse_args()
 ## set up a grid of parameters to cycle over
 ## -----------------------------------------
 
-propLowMedHighs <- 2
+propLowMedHighs <- 1
 regCoeffs <- c(log(1.2), log(1.35), log(1.5), log(1.6), log(1.7), log(1.85), log(2), log(2.5), log(3), log(4), log(5), log(7), log(10), log(15), log(20))
-#propImps <- c(0.05,0.1,0.2,0.3)
-
 
 propImps <- c(0.1)
-ns <- c(50, 100, 200,500,1000)
-#ps <- c(20, 100,200,400)
-ps <- c(100)
+ns <- c(2700)
+ps <- c(2000)
 
 ## number of monte-carlo iterations per job
 nreps_per_combo <- args$nreps
@@ -47,11 +44,10 @@ param_grid <- expand.grid(regCoeff=regCoeffs,
                           propImp=propImps,
                           propLowMedHigh = propLowMedHighs,
                           n=ns,
-                          p=ps)
+                          p=ps,
+                          trialrep=1:4)
 
-probMatrix <- rbind(c(0.5,0.5),
-                    c(0,1),
-                    c(1,0))
+probMatrix <- rbind(c(0.5,0.5), c(1,0))
 
 ## -----------------------------------------
 ## get current dynamic arguments
@@ -77,15 +73,15 @@ filename <- paste("res/",args$simname, jobid, ".txt", sep="")
 
 eps=c(0.1,0.25,0.5,0.75,0.9)
 
-system.time(replicate(args$nreps, 
-                      one_trial_count_split(n=current_dynamic_args$n,
-                                            p=current_dynamic_args$p,
-                                            filename,
-                                            k=1,
-                                            propImp=current_dynamic_args$propImp, 
-                                            eps=eps, 
-                                            sig_strength=current_dynamic_args$regCoeff,
-                                 propLowMedHigh = probMatrix[current_dynamic_args$propLowMedHigh,])))
+#system.time(replicate(args$nreps, 
+#                      one_trial_count_split(n=current_dynamic_args$n,
+#                                            p=current_dynamic_args$p,
+#                                            filename,
+#                                            k=1,
+#                                            propImp=current_dynamic_args$propImp, 
+#                                            eps=eps, 
+#                                            sig_strength=current_dynamic_args$regCoeff,
+#                                 propLowMedHigh = c(0.5,0.5))))
 
 
 filename <- paste("clusterres/",args$simname, jobid, ".txt", sep="")
@@ -100,6 +96,6 @@ system.time(replicate(args$nreps,
                                             propImp=current_dynamic_args$propImp,
                                             eps=eps,
                                             sig_strength=current_dynamic_args$regCoeff,
-                                 propLowMedHigh = probMatrix[current_dynamic_args$propLowMedHigh,])))
+                                 propLowMedHigh = c(0.5,0.5))))
 
 

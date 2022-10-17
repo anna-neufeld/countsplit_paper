@@ -67,5 +67,5 @@ ggplot(data=NULL)+geom_qq(aes(sample=pvals_lucy10, col="bSelective inference"), 
   labs(col="Method")+xlab("Unif(0,1) Quantiles")+ylab("Sample Quantiles")+
  scale_color_manual(values=c(countsplitcol, selectivecol, naivecol), 
                     labels=c("Count splitting", "Selective inference", "Double dipping"))
-ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat Revision August 2022/Figures/selective.png")
+ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat_Resubmit_October/selective.eps")
 

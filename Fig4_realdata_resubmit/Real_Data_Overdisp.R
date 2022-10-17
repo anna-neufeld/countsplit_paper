@@ -8,31 +8,21 @@ library(Seurat)
 setwd("~/countsplit_paper/Fig4_realdata_resubmit/")
 source("myMonocle.R")
 
-
-
-
-
-##### Read in the data. 
-cm.train <- readRDS("seurat.cm.10k.training_split.rds")
-cm.test <- readRDS("seurat.cm.10k.testing_split.rds")
+load("Xtrain.rda")
+load("Xtest.rda")
 metadata <- read.delim("metadata.tsv")
-
-
 rownames(metadata) <- metadata$cell
 #### Genes that were never expressed (only contained 0s) in either the training
 #### or test matrices got automatically removed from the data by Seurat.
 ### Thus, we need to make sure the dimensions match before we add Xtrain
 ### and Xtest together. 
-cells.to.keep <- intersect(colnames(cm.train ), colnames(cm.test))
-genes.to.keep <- intersect(rownames(cm.train ), rownames(cm.test))
+cells.to.keep <- intersect(colnames(Xtrain ), colnames(Xtest))
+genes.to.keep <- intersect(rownames(Xtrain), rownames(Xtest))
 
 metadata <- metadata[cells.to.keep,]
-cm.train <- cm.train[genes.to.keep, cells.to.keep]
-cm.test <- cm.test[genes.to.keep, cells.to.keep]
+cm.train <- Xtrain[genes.to.keep, cells.to.keep]
+cm.test <- Xtest[genes.to.keep, cells.to.keep]
 
-### This just reconstructs X for the correct 10,000 cells from the train/test sets. 
-Xtrain <- GetAssayData(cm.train, "counts", assay="RNA")
-Xtest <- GetAssayData(cm.test, "counts", assay="RNA")
 X <- Xtrain+Xtest
 
 cm <- SingleCellExperiment(assays=list(counts=X))
@@ -73,6 +63,8 @@ pred_means_2 <- apply(pred_means, 1, function(u) u/overdisps$nb1)
 #ggplot(data=NULL, aes(x=as.numeric(pred_means_2)+1),after_stat(density))+geom_histogram()+scale_x_log10()+
 #theme_bw()+xlab("Overdispersion")
 
+save.image("real_data_overdisp.RData")
+
 
 set.seed(1)
 ### Use random indices to avoid crashing the computer. 
@@ -81,4 +73,4 @@ ggplot(data=NULL, aes(x=as.numeric(t(pred_means_2))[randomindices], y=..density.
   geom_histogram()+scale_x_log10()+theme_bw()+
   geom_vline(xintercept=1, col="red")+
   xlab("Overdispersion (log scale)")+ylab("")+ggtitle("Histogram of Estimated Overdispersion Values")
-ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat Revision August 2022/Figures/overdisps_cm.png")
+ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat_Resubmit_October/overdisps_cm.eps")

@@ -13,11 +13,12 @@ source("myMonocle.R")
 #### The countsplitting on the FULL dataset (~900,000 cells) was done externally by our collaborators,
 #### As was the lineage subsetting.
 #### Details on this external process can be found in Elorbany et al. 
-Xtrain <- readRDS("Xtrain.RData")
-Xtest <- - readRDS("Xtest.RData")
+load("Xtrain.rda")
+load("Xtest.rda")
 metadata <- read.delim("metadata.tsv")
 cells.to.keep <- intersect(colnames(Xtrain ), colnames(Xtest))
 genes.to.keep <- intersect(rownames(Xtrain ), rownames(Xtest))
+rownames(metadata) <- metadata$cell
 metadata <- metadata[cells.to.keep,]
 
 X <- Xtrain+Xtest
@@ -110,7 +111,7 @@ pvals_test_naive0 <- apply(Xtest0[hvg.cm.var0, ], 1, function(u) summary(speedgl
 pvals_train_naive0 <- apply(Xtrain0[hvg.cm.var, ], 1, function(u) summary(speedglm(u~pt_train0, offset=logSFs_train_0, maxit=20, family=poisson("log")))$coefficients[2,4])
 
 
-save.image("monocle_workspace_Oct3.RData")
+save.image("monocle_workspace_Oct17.RData")
 
 library(tidyverse)
 ### Really affected by ridiculuously small numbers.
@@ -176,11 +177,5 @@ p4
 
 library(patchwork)
 p3+p4
-ggsave(filename="~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat Revision August 2022/Figures/monocle_both_NEW.png")
-
-
-## Type 1 errors!
-mean(pvals_countsplit_0 < 0.05, na.rm=TRUE)
-mean(pvals_full_naive0 < 0.05, na.rm=TRUE)
-mean(pvals_test_naive0 < 0.05, na.rm=TRUE)
+ggsave(filename="~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat_Resubmit_October/monocle_both_NEW.eps")
 

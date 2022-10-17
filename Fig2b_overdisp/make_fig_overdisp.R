@@ -1,4 +1,4 @@
-setwd("~/countsplit_paper/Fig1b_overdisp")
+setwd("~/countsplit_paper/Fig2b_overdisp")
 setwd("./overdispres_pt")
 file_names <- dir(".", pattern="Feb2*") #where you have your files
 res <- do.call(rbind,lapply(file_names,read.csv,sep="",header=FALSE))
@@ -31,5 +31,5 @@ theme_bw()+scale_color_manual(
   limits=c("Count splitting, \u03B5 =0.5", "Double dipping"),
   values=c(countsplitcol, naivecol))+
   xlab("Unif(0,1) Quantiles")+ylab("Sample Quantiles")
-ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat Revision August 2022/Figures/overdisp_new.png",
+ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat_Resubmit_October/overdisp_new.eps",
        width=13, height=4)

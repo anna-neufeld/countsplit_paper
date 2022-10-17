@@ -149,4 +149,4 @@ p2power <- ggplot(data=power_cluster_res, aes(x=abs(fitCoeff), y=as.numeric(pval
 p1null+ p1detect+ p1power+
   p2null+p2detect+p2power+
   plot_layout(guides="collect", nrow=2)
-ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat Revision August 2022/Figures/mega_figure.png", width=15, height=6)
+ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat_Resubmit_October/megaFig2.eps", width=15, height=6.5)

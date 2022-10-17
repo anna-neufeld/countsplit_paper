@@ -154,7 +154,7 @@ p2 <- ggplot(data=NULL)+
 
 library(patchwork)
 p1+p2+plot_layout(guides="collect")
-ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat Revision August 2022/Figures/Seurat_Monocle_appendix.png")
+ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat_Resubmit_October/Seurat_Monocle_appendix.eps")
 
 
 

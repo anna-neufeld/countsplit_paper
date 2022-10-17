@@ -1,6 +1,6 @@
 # Table1_coverage
 
-The file coverage_res_analyze.R reads in results from the folders res.zip and cluster_res.zip (which must be unzipped in order to access) an creates Table 1.
+The file coverage_res_analyze.R reads in results from the folders res.zip and cluster_res.zip (which must be unzipped in order to access) and creates Table 1.
 
 The file sim_functions_cluster.R contains all functions that are used to run the coverage simualtions. These functions are called from the file run_sims_cluster.R. Note that this file was run numerous times in paralell on a computing cluster, necessitating the use of call_sim.sh and submit_sim.sh.
 
