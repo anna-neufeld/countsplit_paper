@@ -1,5 +1,7 @@
 #!/bin/bash
 
-njobs=45
+njobs=1000
 
-qsub -q w-bigmem.q -e iotrash/ -o iotrash/ -l h='biostat-b15|biostat-b16|biostat-b17|biostat-b18' -l h_vmem=10G -t 1-$njobs -tc 25 ./call_sim.sh $1 $2
+sbatch -p witten-12c128g --array=1-$njobs -e ./out/s-%A_%a.out -o ./out/s-%A_%a.out ./call_sim.sh 
+
+

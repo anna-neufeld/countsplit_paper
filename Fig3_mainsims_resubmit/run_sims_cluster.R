@@ -3,13 +3,33 @@
 ## Run the simulation!
 
 ## -----------------------------------------
+## install packages
+## -----------------------------------------
+
+## define packages to install
+packages <- c("argparse", "tidyr", "findpython", "mclust")
+
+## install all packages that are not already installed
+user_name = "wenhaop"
+lib_dir = paste("/home/users/", user_name, "/R_lib", sep="")
+install.packages(
+    setdiff(packages, rownames(installed.packages(lib_dir))),
+    repos = "http://cran.us.r-project.org",
+    lib=lib_dir
+) # install packages only once to avoid errors when parallel computing
+
+## -----------------------------------------
 ## load user-defined functions, packages
 ## -----------------------------------------
 
 ## get command line arguments
-library("argparse")
+library("argparse", lib="/home/users/wenhaop/R_lib")
 ## tidy stuff
-library("tidyr")
+library("tidyr", lib="/home/users/wenhaop/R_lib")
+## find an acceptable python binary
+library("findpython", lib="/home/users/wenhaop/R_lib")
+## Gaussian Mixture Modelling
+library("mclust", lib="/home/users/wenhaop/R_lib")
 ## Needed functions.
 source("sim_functions_cluster.R")
 
@@ -36,9 +56,9 @@ regCoeffs <- c(log(1.2), log(1.35), log(1.5), log(1.6), log(1.7), log(1.85), log
 
 
 propImps <- c(0.1)
-ns <- c(200)
+ns <- c(2700)
 #ps <- c(20, 100,200,400)
-ps <- c(100)
+ps <- c(2000)
 
 ## number of monte-carlo iterations per job
 nreps_per_combo <- args$nreps
@@ -58,8 +78,7 @@ probMatrix <- rbind(c(0.5,0.5),
 ## -----------------------------------------
 ## get job id from scheduler
 
-jobid <- as.numeric(Sys.getenv("SGE_TASK_ID"))
-
+jobid <- as.numeric(Sys.getenv("SLURM_ARRAY_TASK_ID"))
                                    #job_id <- 1
 
 ## current args
@@ -102,4 +121,4 @@ system.time(replicate(args$nreps,
                                             sig_strength=current_dynamic_args$regCoeff,
                                  propLowMedHigh = probMatrix[current_dynamic_args$propLowMedHigh,])))
 
-
+cat("DONE!!!")
