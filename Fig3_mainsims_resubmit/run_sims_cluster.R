@@ -45,7 +45,6 @@ parser$add_argument("--nreps", type = "double", default = 200,
 #                    help = "number of replicates per job")
 args <- parser$parse_args()
 
-
 ## -----------------------------------------
 ## set up a grid of parameters to cycle over
 ## -----------------------------------------
@@ -56,9 +55,9 @@ regCoeffs <- c(log(1.2), log(1.35), log(1.5), log(1.6), log(1.7), log(1.85), log
 
 
 propImps <- c(0.1)
-ns <- c(2700)
+ns <- c(200)
 #ps <- c(20, 100,200,400)
-ps <- c(2000)
+ps <- c(100)
 
 ## number of monte-carlo iterations per job
 nreps_per_combo <- args$nreps
@@ -83,7 +82,6 @@ jobid <- as.numeric(Sys.getenv("SLURM_ARRAY_TASK_ID"))
 
 ## current args
 current_dynamic_args <- param_grid[jobid, ]
-
 
 ## -----------------------------------------
 ## run the simulation nreps_per_job times
@@ -120,5 +118,3 @@ system.time(replicate(args$nreps,
                                             eps=eps,
                                             sig_strength=current_dynamic_args$regCoeff,
                                  propLowMedHigh = probMatrix[current_dynamic_args$propLowMedHigh,])))
-
-cat("DONE!!!")
