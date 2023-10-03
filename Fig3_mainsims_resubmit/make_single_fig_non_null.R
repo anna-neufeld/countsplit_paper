@@ -15,7 +15,7 @@ library(patchwork, lib="/home/users/wenhaop/R_lib")
 setwd("~/countsplit_paper/Fig3_mainsims_resubmit/")
 
 ## simulation name
-simname <- "test"
+simname <- "big_test"
 
 ### Make sure that countsplit_paper repository is saved in your home directory. 
 
@@ -42,11 +42,9 @@ null_cluster_res <- cluster_res %>% filter(trueCoeff==0, prop1==0.5)
 power_cluster_res <- cluster_res %>% filter(j <= 250)
 
 set.seed(1)
-# subsamp <- sample(1:NROW(null_res), size=10^5)
-subsamp <- sample(1:NROW(null_res), size=10^3)
+subsamp <- sample(1:NROW(null_res), size=10^5)
 null_res_subset <- null_res[subsamp,]
-# subsamp <- sample(1:NROW(null_cluster_res), size=10^5)
-subsamp <- sample(1:NROW(null_cluster_res), size=10^3)
+subsamp <- sample(1:NROW(null_cluster_res), size=10^5)
 null_clusterres_subset <- null_cluster_res[subsamp,]
 
 #null_res_subset$intercept3 = "exp(\u03B20)=25"
@@ -87,7 +85,7 @@ p2null <- ggplot(data=null_clusterres_subset, aes(sample=as.numeric(pval), col=a
 ### Takeaways: Type 1 error is controlled! Epsilon does not matter at ALL for this. 
 # p1+p2+plot_layout(nrow=1, guides="collect")
 p1null+p2null+plot_layout(nrow=1, guides="collect")
-ggsave("figures/Fig2.png")
+ggsave(paste("figures/",simname, "_Fig2.png", sep=""))
 
 ##### DETECTION FIGURE
 detection_res <- power_res %>% filter(j==1) %>% group_by(trueCoeff, eps,prop1) %>%
@@ -136,7 +134,7 @@ p2detect <- ggplot(data=detection_res_cluster, aes(x=abs(trueCoeff), y=avcor, co
   xlab(expression(beta['1j']))+
   theme_bw()
 p1detect+p2detect+plot_layout(guides="collect", nrow=2)
-ggsave("figures/Fig3.png")
+ggsave(paste("figures/",simname, "_Fig3.png", sep=""))
 
 
 
@@ -169,10 +167,10 @@ p2power <- ggplot(data=power_cluster_res, aes(x=abs(fitCoeff), y=as.numeric(pval
   theme_bw()
 
 p1power+p2power+plot_layout(guides="collect", nrow=1)
-ggsave("figures/Fig4.png", width=8, height=4)
+ggsave(paste("figures/",simname, "_Fig4.png", sep=""))
 
 
 p1null+ p1detect+ p1power+
   p2null+p2detect+p2power+
   plot_layout(guides="collect", nrow=2)
-ggsave("figures/megaFig2.eps", width=15, height=6.5)
+ggsave(paste("figures/",simname, "_megaFig2.eps", sep=""), width=15, height=6.5)
