@@ -18,4 +18,6 @@ The code for Figure 5 from the supplementary materials is available in the folde
 
 The experiments/code for Figure 6 (appendix) are in the folder Fig6_compare_selective. 
 
+This material is based upon research supported in part by the Office of Naval Research under Award Number N000142312589 and the National Science Foundation under Award Number 2322920.
+
 
