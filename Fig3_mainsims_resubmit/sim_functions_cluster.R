@@ -55,10 +55,10 @@ countsplit <- function(X,Lambda, ep,c=1, gammas=rep(1,NROW(X))) {
   
 
   #pseudotime <- princomp(hXtrain)$scores[,1]
-  pseudotime <- svd(hXtraincenter)$u[,1]
+  pseudotime <- svd(hXtraincenter)$u[,1] #L^{hat}(X^{train})
   
   # Could it possibly matter here whether or not I put a 1-eps in the offset??? 
-  pvals_pseudotime <- apply(Xtest, 2, function(u) summary(glm(u~pseudotime, offset=log(gammas), family="poisson"))$coefficients[2,4])
+  pvals_pseudotime <- apply(Xtest, 2, function(u) summary(glm(u~pseudotime, offset=log(gammas), family="poisson"))$coefficients[2,4]) # Step 2
 
   
   true_coeffs <- suppressWarnings(apply(Lambda, 2, function(u) summary(glm(u~pseudotime, family="poisson"))$coefficients[2,1]))
