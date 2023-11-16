@@ -76,7 +76,7 @@ countsplit <- function(X,Lambda, ep,c=1, gammas=rep(1,NROW(X))) {
   #mean(apply(CIs.sandwich,2,function(u) u[2]-u[1]))
   
   
-  #### SHIT ok note to self- since the Lambdas are not integers do we need to consider manual maximum likelihood??
+  #### Note to self- since the Lambdas are not integers do we need to consider manual maximum likelihood??
   true_coeffs <- suppressWarnings(apply(Lambda, 2, function(u) summary(glm(u~pseudotime, family="poisson"))$coefficients[2,1]))
   true_coeffs2 <- suppressWarnings(apply(diag(gammas)%*%Lambda, 2, function(u) summary(glm(u~pseudotime+offset(log(gammas)), family="poisson"))$coefficients[2,1]))
   
