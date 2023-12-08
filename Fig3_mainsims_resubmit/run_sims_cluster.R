@@ -3,13 +3,33 @@
 ## Run the simulation!
 
 ## -----------------------------------------
+## install packages
+## -----------------------------------------
+
+## define packages to install
+packages <- c("argparse", "tidyr", "findpython", "mclust")
+
+## install all packages that are not already installed
+user_name = "wenhaop"
+lib_dir = paste("/home/users/", user_name, "/R_lib", sep="")
+install.packages(
+    setdiff(packages, rownames(installed.packages(lib_dir))),
+    repos = "http://cran.us.r-project.org",
+    lib=lib_dir
+) # install packages only once to avoid errors when parallel computing
+
+## -----------------------------------------
 ## load user-defined functions, packages
 ## -----------------------------------------
 
 ## get command line arguments
-library("argparse")
+library("argparse", lib="/home/users/wenhaop/R_lib")
 ## tidy stuff
-library("tidyr")
+library("tidyr", lib="/home/users/wenhaop/R_lib")
+## find an acceptable python binary
+library("findpython", lib="/home/users/wenhaop/R_lib")
+## Gaussian Mixture Modelling
+library("mclust", lib="/home/users/wenhaop/R_lib")
 ## Needed functions.
 source("sim_functions_cluster.R")
 
@@ -24,7 +44,6 @@ parser$add_argument("--nreps", type = "double", default = 200,
 #parser$add_argument("--nreps-per-job", type = "double", default = 200,
 #                    help = "number of replicates per job")
 args <- parser$parse_args()
-
 
 ## -----------------------------------------
 ## set up a grid of parameters to cycle over
@@ -58,13 +77,11 @@ probMatrix <- rbind(c(0.5,0.5),
 ## -----------------------------------------
 ## get job id from scheduler
 
-jobid <- as.numeric(Sys.getenv("SGE_TASK_ID"))
-
+jobid <- as.numeric(Sys.getenv("SLURM_ARRAY_TASK_ID"))
                                    #job_id <- 1
 
 ## current args
 current_dynamic_args <- param_grid[jobid, ]
-
 
 ## -----------------------------------------
 ## run the simulation nreps_per_job times
@@ -101,5 +118,3 @@ system.time(replicate(args$nreps,
                                             eps=eps,
                                             sig_strength=current_dynamic_args$regCoeff,
                                  propLowMedHigh = probMatrix[current_dynamic_args$propLowMedHigh,])))
-
-

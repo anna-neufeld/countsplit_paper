@@ -1,18 +1,33 @@
-library(tidyverse)
-library(patchwork)
+## define packages to install
+packages <- c("tidyverse", "patchwork")
+
+## install all packages that are not already installed
+user_name = "wenhaop"
+lib_dir = paste("/home/users/", user_name, "/R_lib", sep="")
+install.packages(
+    setdiff(packages, rownames(installed.packages(lib_dir))),
+    repos = "http://cran.us.r-project.org",
+    lib=lib_dir
+) # install packages only once to avoid errors when parallel computing
+
+library(tidyverse, lib="/home/users/wenhaop/R_lib")
+library(patchwork, lib="/home/users/wenhaop/R_lib")
 setwd("~/countsplit_paper/Fig3_mainsims_resubmit/")
+
+## simulation name
+simname <- "big_test"
 
 ### Make sure that countsplit_paper repository is saved in your home directory. 
 
 #### DATA FOR FIGS 2-4
 setwd("~/countsplit_paper/Fig3_mainsims_resubmit/res")
-file_names <- dir("~/countsplit_paper/Fig3_mainsims_resubmit/res/", pattern="sep12_single_np*") 
+file_names <- dir("~/countsplit_paper/Fig3_mainsims_resubmit/res/", pattern=paste(simname, "*", sep="")) 
 res <- do.call(rbind,lapply(file_names,read.csv,sep="",header=FALSE))
 names(res) <- c("j", "trueCoeff", "intercept", "pval", "fitCoeff", "cor", "eps", "type", "propImp",
                 "n", "p", "prop1")
 
 setwd("~/countsplit_paper/Fig3_mainsims_resubmit/clusterres")
-file_names <- dir("~/countsplit_paper/Fig3_mainsims_resubmit/clusterres", pattern="sep12_single_np*") 
+file_names <- dir("~/countsplit_paper/Fig3_mainsims_resubmit/clusterres", pattern=paste(simname, "*", sep="")) 
 cluster_res <- do.call(rbind,lapply(file_names,read.csv,sep="",header=FALSE))
 names(cluster_res) <- c("j", "trueCoeff", "intercept", "pval", "fitCoeff", "cor", "eps", "type", "propImp",
                 "n", "p", "prop1")
@@ -43,25 +58,34 @@ null_res_subset$intercept3 = ordered(null_res_subset$intercept3, levels=c("Low I
 null_clusterres_subset$intercept3 = ordered(null_clusterres_subset$intercept3, levels=c("Low Intercept",
                                                                           "High Intercept"))
 
+setwd("~/countsplit_paper/Fig3_mainsims_resubmit/")
 ###### TYPE 1 ERROR FIGURE
-p1null <- ggplot(data=null_res_subset, aes(sample=as.numeric(pval), col=as.factor(eps), group=eps))+geom_qq(distribution="qunif")+
+p1null <- ggplot(data=null_res_subset, aes(sample=as.numeric(pval), col=as.factor(eps), group=eps))+
+  geom_qq(distribution=stats::qunif)+
   facet_grid(col=vars(intercept3))+
   geom_abline(slope=1, col="red")+
   ggtitle("Type 1 error")+
-  labs(col=expression(epsilon))+xlab("Unif(0,1) Quantiles")+ylab("Sample Quantiles")+
+  labs(col=expression(epsilon))+
+  xlab("Unif(0,1) Quantiles")+
+  ylab("Sample Quantiles")+
   coord_fixed()+
   theme_bw()+
   guides(col="none")
-p2null <- ggplot(data=null_clusterres_subset, aes(sample=as.numeric(pval), col=as.factor(eps), group=eps))+geom_qq(distribution="qunif")+
+p2null <- ggplot(data=null_clusterres_subset, aes(sample=as.numeric(pval), col=as.factor(eps), group=eps))+
+  geom_qq(distribution=stats::qunif)+
   facet_grid(col=vars(intercept3))+
-  geom_abline(slope=1, col="red")+ggtitle("Type 1 error")+
-  xlab("Unif(0,1) Quantiles")+ylab("Sample Quantiles")+
-  labs(col=expression(epsilon))+coord_fixed()+
+  geom_abline(slope=1, col="red")+
+  ggtitle("Type 1 error")+
+  xlab("Unif(0,1) Quantiles")+
+  ylab("Sample Quantiles")+
+  labs(col=expression(epsilon))+
+  coord_fixed()+
   theme_bw()+
   guides(col="none")
 ### Takeaways: Type 1 error is controlled! Epsilon does not matter at ALL for this. 
-#p1+p2+plot_layout(nrow=1, guides="collect")
-#ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat Revision August 2022/Figures/Fig2.png")
+# p1+p2+plot_layout(nrow=1, guides="collect")
+p1null+p2null+plot_layout(nrow=1, guides="collect")
+ggsave(paste("figures/",simname, "_Fig2.png", sep=""))
 
 ##### DETECTION FIGURE
 detection_res <- power_res %>% filter(j==1) %>% group_by(trueCoeff, eps,prop1) %>%
@@ -109,8 +133,8 @@ p2detect <- ggplot(data=detection_res_cluster, aes(x=abs(trueCoeff), y=avcor, co
   ylab(expression('Adjusted Rand Index between  '*widehat(L)(X^{train})*' and '*L))+
   xlab(expression(beta['1j']))+
   theme_bw()
-#p1+p2+plot_layout(guides="collect", nrow=2)
-#ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat Revision August 2022/Figures/Fig3.png")
+p1detect+p2detect+plot_layout(guides="collect", nrow=2)
+ggsave(paste("figures/",simname, "_Fig3.png", sep=""))
 
 
 
@@ -142,11 +166,11 @@ p2power <- ggplot(data=power_cluster_res, aes(x=abs(fitCoeff), y=as.numeric(pval
   labs(col=expression(epsilon))+
   theme_bw()
 
-#p1+p2+plot_layout(guides="collect", nrow=1)
-#ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat Revision August 2022/Figures/Fig4.png", width=8, height=4)
+p1power+p2power+plot_layout(guides="collect", nrow=1)
+ggsave(paste("figures/",simname, "_Fig4.png", sep=""))
 
 
 p1null+ p1detect+ p1power+
   p2null+p2detect+p2power+
   plot_layout(guides="collect", nrow=2)
-ggsave("~/Dropbox/Pseudotime : PCA NEW/Paper/Biostat_Resubmit_October/megaFig2.eps", width=15, height=6.5)
+ggsave(paste("figures/",simname, "_megaFig2.eps", sep=""), width=15, height=6.5)
